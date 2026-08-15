@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Spectral Lens</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap"
+    />
+    <style>
+      /* Matches the critical inline style on the chapter pages so
+         navigation never flashes the browser's default white canvas. */
+      :root {
+        color-scheme: light dark;
+      }
+      html {
+        background: #faf8f3;
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          background: #15171c;
+        }
+      }
+
+      :root {
+        --paper: #faf8f3;
+        --panel: #ffffff;
+        --ink: #22252c;
+        --muted: #6f6a60;
+        --hairline: #e5e0d5;
+        --accent: #3556b5;
+        --accent-soft: #eef1fa;
+        --warm: #b3552e;
+        --serif: "Spectral", Georgia, serif;
+        --sans: "IBM Plex Sans", system-ui, sans-serif;
+        --mono: "IBM Plex Mono", ui-monospace, monospace;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #15171c;
+          --panel: #1d2026;
+          --ink: #e7e4dd;
+          --muted: #9b968c;
+          --hairline: #2b2f38;
+          --accent: #7d97e0;
+          --accent-soft: #232a3d;
+          --warm: #d98b63;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--serif);
+        font-size: 1.05rem;
+        line-height: 1.65;
+      }
+
+      .wrap {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 5rem 1.5rem 4rem;
+      }
+
+      .eyebrow {
+        font-family: var(--sans);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--warm);
+        margin: 0 0 0.8rem;
+      }
+
+      h1 {
+        font-size: clamp(2.6rem, 7vw, 4rem);
+        font-weight: 600;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        margin: 0 0 1rem;
+      }
+
+      .dek {
+        font-size: 1.25rem;
+        font-style: italic;
+        color: var(--muted);
+        margin: 0 0 3.5rem;
+      }
+
+      .chapters {
+        list-style: none;
+        margin: 0 0 4rem;
+        padding: 0;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .chapters a {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 1.1rem;
+        align-items: baseline;
+        background: var(--panel);
+        border: 1px solid var(--hairline);
+        border-radius: 14px;
+        padding: 1.3rem 1.5rem;
+        text-decoration: none;
+        color: var(--ink);
+        transition: border-color 120ms ease;
+      }
+
+      .chapters a:hover {
+        border-color: var(--accent);
+      }
+
+      .chapters .no {
+        font-family: var(--mono);
+        font-size: 1.4rem;
+        color: var(--accent);
+      }
+
+      .chapters h2 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0 0 0.3rem;
+      }
+
+      .chapters p {
+        margin: 0 0 0.5rem;
+        color: var(--muted);
+        font-size: 0.98rem;
+      }
+
+      .chapters .touch {
+        font-family: var(--sans);
+        font-size: 0.8rem;
+        color: var(--accent);
+        margin: 0;
+      }
+
+      .how {
+        border-top: 1px solid var(--hairline);
+        padding-top: 2.5rem;
+      }
+
+      .how h2 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 0 0 0.8rem;
+      }
+
+      .how p {
+        margin: 0 0 1em;
+      }
+
+      .mono {
+        font-family: var(--mono);
+        font-size: 0.9em;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      footer {
+        margin-top: 3rem;
+        font-family: var(--sans);
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <p class="eyebrow">A live book, in three chapters</p>
+        <h1>The Spectral Lens</h1>
+        <p class="dek">
+          Eigenvalues, graphs, and the structure they reveal — every figure on
+          every page is computed live, in your browser, by a Python notebook.
+        </p>
+      </header>
+
+      <ol class="chapters">
+        <li>
+          <a href="shape/">
+            <span class="no">1</span>
+            <span>
+              <h2>The Shape of a Matrix</h2>
+              <p>
+                A symmetric matrix stretches the plane along its eigenvectors.
+                The eigendecomposition M&nbsp;=&nbsp;VDV<sup>T</sup>, made
+                physical.
+              </p>
+              <p class="touch">
+                You can touch: the matrix itself, its eigenvalues, and a
+                lasso-selectable vector field.
+              </p>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="drawing/">
+            <span class="no">2</span>
+            <span>
+              <h2>Drawing with Eigenvectors</h2>
+              <p>
+                A graph has no coordinates. The eigenvectors of its Laplacian
+                invent coordinates that respect its connectivity.
+              </p>
+              <p class="touch">
+                You can touch: the graph family, its size, and which
+                eigenvectors serve as the x- and y-axes.
+              </p>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="filtering/">
+            <span class="no">3</span>
+            <span>
+              <h2>Filtering on Graphs</h2>
+              <p>
+                The Laplacian eigenbasis is a Fourier basis for graphs. Project
+                a noisy signal onto its smooth end and the noise falls away.
+              </p>
+              <p class="touch">
+                You can touch: the signal, the noise level, and the filter
+                cutoff — with live mean-squared-error scoring.
+              </p>
+            </span>
+          </a>
+        </li>
+      </ol>
+
+      <section class="how">
+        <h2>How this book works</h2>
+        <p>
+          Each chapter is an ordinary marimo notebook from the
+          <a href="https://github.com/marimo-team/gallery-examples">marimo
+          gallery</a>. <a href="https://pypi.org/project/marimo-studio/">marimo
+          studio</a> projects named cells of each notebook into a hand-designed
+          web page: tags like
+          <span class="mono">&lt;marimo-cell name="spectral_layout"&gt;</span>
+          pull in live figures, and the sliders you drag re-run the same cells
+          a reader could inspect in the notebook.
+        </p>
+        <p>
+          Unlike a rendered notebook, the page owns its presentation — the
+          sidebar, the margin notes, the order of ideas — while the notebook
+          stays the single source of the computation. Each chapter ships as a
+          static WebAssembly bundle, so the Python you are running was
+          installed by your browser, not a server.
+        </p>
+      </section>
+
+      <footer>
+        Notebooks from the
+        <a href="https://github.com/marimo-team/gallery-examples">marimo team's
+        gallery</a>, restructured into a book with marimo studio.
+      </footer>
+    </div>
+  </body>
+</html>

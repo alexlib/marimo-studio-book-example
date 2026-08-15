@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Shape of a Matrix · The Spectral Lens</title>
+    <style>
+      /* Critical: paint the right canvas color before any stylesheet loads,
+         so navigating between pages never flashes the browser's default
+         white background (glaring in dark mode). Keep in sync with the
+         --paper token in book.css. */
+      :root {
+        color-scheme: light dark;
+      }
+      html {
+        background: #faf8f3;
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          background: #15171c;
+        }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap"
+    />
+    <link rel="stylesheet" href="book.css" />
+    <script type="module" src="book.js"></script>
+  </head>
+  <body>
+    <div class="book" id="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="../">
+          <span class="brand-title">The Spectral Lens</span>
+          <span class="brand-sub">Eigenvalues, graphs, and the structure they reveal</span>
+        </a>
+        <nav aria-label="Chapters">
+          <ol class="toc">
+            <li class="current">
+              <a href="./" aria-current="page"><span class="chapter-no">1</span>The Shape of a Matrix</a>
+              <ol class="sections">
+                <li><a href="#matrix">Pick a matrix</a></li>
+                <li><a href="#picture">What it does to a circle</a></li>
+                <li><a href="#decomposition">The decomposition, live</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="../drawing/"><span class="chapter-no">2</span>Drawing with Eigenvectors</a>
+            </li>
+            <li>
+              <a href="../filtering/"><span class="chapter-no">3</span>Filtering on Graphs</a>
+            </li>
+          </ol>
+        </nav>
+        <p class="sidebar-foot">
+          Every figure on this page is a live cell of a
+          <a href="https://marimo.io">marimo</a> notebook, presented with
+          <a href="https://pypi.org/project/marimo-studio/">marimo studio</a>.
+          Python runs in your browser.
+        </p>
+      </aside>
+
+      <main class="content">
+        <header class="chapter-header">
+          <p class="eyebrow">Chapter 1</p>
+          <h1>The Shape of a Matrix</h1>
+          <p class="dek">
+            A symmetric matrix stretches the plane. Its eigenvectors are the two
+            directions it cannot rotate, and its eigenvalues say how hard it
+            pulls along each one.
+          </p>
+        </header>
+
+        <p>
+          Every symmetric matrix factors into three simpler pieces: a rotation,
+          a stretch, and the rotation undone.
+        </p>
+        <div class="equation">
+          <marimo-cell name="math_decomposition"></marimo-cell>
+        </div>
+        <p>
+          Here <span class="mono">V</span> holds the eigenvectors as columns and
+          <span class="mono">D</span> is diagonal, holding the eigenvalues. This
+          chapter makes the formula physical: you choose the matrix, and the
+          page shows the stretch it performs.
+        </p>
+
+        <section id="matrix">
+          <h2>Pick a matrix</h2>
+          <p>
+            Drag any entry of <span class="mono">M</span> below. The matrix is
+            kept symmetric — editing an off-diagonal entry moves its mirror
+            image — so its eigenvalues stay real and its eigenvectors stay
+            perpendicular. Everything else on this page recomputes as you drag.
+          </p>
+          <div class="controls">
+            <p class="controls-label">The matrix under study</p>
+            <marimo-output value="matrix_ui"></marimo-output>
+          </div>
+          <div class="chips" aria-label="Live matrix statistics">
+            <span class="chip">λ<sub>1</sub> = <b mo-value="matrix_stats.lambda1"></b></span>
+            <span class="chip">λ<sub>2</sub> = <b mo-value="matrix_stats.lambda2"></b></span>
+            <span class="chip">det M = <b mo-value="matrix_stats.det"></b></span>
+            <span class="chip">tr M = <b mo-value="matrix_stats.trace"></b></span>
+          </div>
+          <p class="note">
+            These four numbers update as you drag. Notice that the trace always
+            equals λ<sub>1</sub> + λ<sub>2</sub> and the determinant always
+            equals λ<sub>1</sub> · λ<sub>2</sub>.
+          </p>
+        </section>
+
+        <section id="picture">
+          <h2>What it does to a circle</h2>
+          <p>
+            Apply <span class="mono">M</span> to every point of the unit circle
+            and you get an ellipse. The ellipse's axes point along the
+            eigenvectors, and each axis is as long as the matching eigenvalue.
+            That is the entire geometric content of the eigendecomposition.
+          </p>
+          <figure class="figure-panel">
+            <marimo-cell name="transform_plot"></marimo-cell>
+            <figcaption>
+              The unit circle (dashed) and its image under the matrix (blue).
+              The arrows are the eigenvectors, scaled by their eigenvalues.
+            </figcaption>
+          </figure>
+          <p>
+            The figure is not a picture of the transform — it is the transform.
+            <strong>Drag a rectangle on the plot</strong> to select grid points,
+            and the notebook draws the displacement vector each selected point
+            travels under the map:
+          </p>
+          <figure class="figure-panel">
+            <marimo-cell name="selection_detail"></marimo-cell>
+            <figcaption>
+              Displacement of your selected points. Points along an eigenvector
+              move parallel to it; points elsewhere shear.
+            </figcaption>
+          </figure>
+        </section>
+
+        <section id="decomposition">
+          <h2>The decomposition, live</h2>
+          <p>
+            Below is the factorization of your matrix, computed by
+            <span class="mono">numpy.linalg.eigh</span>. The outer factors
+            <span class="mono">V</span> and <span class="mono">V<sup>T</sup></span>
+            are fixed by the matrix you chose; the middle factor
+            <span class="mono">D</span> is editable.
+            <strong>Drag its diagonal entries</strong> to build a new matrix
+            <span class="mono">M<sup>★</sup></span> with the same eigenvectors
+            but eigenvalues of your choosing.
+          </p>
+          <div class="figure-panel">
+            <marimo-cell name="decomposition"></marimo-cell>
+            <p class="panel-caption">
+              V × D × V<sup>T</sup> = M<sup>★</sup>, recomputed on every edit.
+            </p>
+          </div>
+          <div class="controls">
+            <p class="controls-label">Which matrix drives the figure above?</p>
+            <marimo-output value="use_m_star"></marimo-output>
+          </div>
+          <p>
+            Flip the switch and scroll back up: the ellipse keeps its
+            orientation — you never touched the eigenvectors — but its axes
+            grow and shrink with the eigenvalues you set. Drive an eigenvalue
+            negative and the ellipse flips through the origin.
+          </p>
+          <div class="aside-box">
+            <marimo-cell name="area_scaling"></marimo-cell>
+          </div>
+        </section>
+
+        <nav class="pager" aria-label="Chapter navigation">
+          <a class="next" href="../drawing/">
+            <span class="pager-dir">Next chapter</span>
+            2 · Drawing with Eigenvectors
+          </a>
+        </nav>
+      </main>
+    </div>
+
+    <p class="boot-pill" aria-live="polite">starting Python — figures load in a moment</p>
+  </body>
+</html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drawing with Eigenvectors · The Spectral Lens</title>
+    <style>
+      /* Critical: paint the right canvas color before any stylesheet loads,
+         so navigating between pages never flashes the browser's default
+         white background (glaring in dark mode). Keep in sync with the
+         --paper token in book.css. */
+      :root {
+        color-scheme: light dark;
+      }
+      html {
+        background: #faf8f3;
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          background: #15171c;
+        }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap"
+    />
+    <link rel="stylesheet" href="book.css" />
+    <script type="module" src="book.js"></script>
+  </head>
+  <body>
+    <div class="book" id="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="../">
+          <span class="brand-title">The Spectral Lens</span>
+          <span class="brand-sub">Eigenvalues, graphs, and the structure they reveal</span>
+        </a>
+        <nav aria-label="Chapters">
+          <ol class="toc">
+            <li>
+              <a href="../shape/"><span class="chapter-no">1</span>The Shape of a Matrix</a>
+            </li>
+            <li class="current">
+              <a href="./" aria-current="page"><span class="chapter-no">2</span>Drawing with Eigenvectors</a>
+              <ol class="sections">
+                <li><a href="#laplacian">A matrix for a graph</a></li>
+                <li><a href="#graph">Choose a graph</a></li>
+                <li><a href="#layouts">Two drawings, one graph</a></li>
+                <li><a href="#axes">Choose the axes</a></li>
+                <li><a href="#spectrum">Read the spectrum</a></li>
+              </ol>
+            </li>
+            <li>
+              <a href="../filtering/"><span class="chapter-no">3</span>Filtering on Graphs</a>
+            </li>
+          </ol>
+        </nav>
+        <p class="sidebar-foot">
+          Every figure on this page is a live cell of a
+          <a href="https://marimo.io">marimo</a> notebook, presented with
+          <a href="https://pypi.org/project/marimo-studio/">marimo studio</a>.
+          Python runs in your browser.
+        </p>
+      </aside>
+
+      <main class="content">
+        <header class="chapter-header">
+          <p class="eyebrow">Chapter 2</p>
+          <h1>Drawing with Eigenvectors</h1>
+          <p class="dek">
+            A graph has no coordinates — only connections. The eigenvectors of
+            its Laplacian invent coordinates that respect them.
+          </p>
+        </header>
+
+        <section id="laplacian">
+          <h2>A matrix for a graph</h2>
+          <p>
+            Chapter 1 studied a matrix we chose by hand. This chapter builds one
+            from a graph. Write <span class="mono">A</span> for the adjacency
+            matrix — a 1 wherever two nodes are connected — and
+            <span class="mono">D</span> for the diagonal matrix of node degrees.
+            Their difference is the <strong>graph Laplacian</strong>:
+          </p>
+          <div class="equation">
+            <marimo-cell name="math_laplacian"></marimo-cell>
+          </div>
+          <p>
+            What makes this matrix special is its quadratic form. Assign a
+            number <span class="mono">x<sub>i</sub></span> to every node, and
+            the Laplacian adds up the disagreement across each edge:
+          </p>
+          <div class="equation">
+            <marimo-cell name="math_energy"></marimo-cell>
+          </div>
+          <p>
+            An eigenvector with a small eigenvalue is therefore a numbering
+            that barely disagrees across edges — connected nodes get similar
+            values. Use two such eigenvectors as <span class="mono">(x, y)</span>
+            coordinates and connected nodes land near each other on the page.
+            That is spectral graph drawing.
+          </p>
+        </section>
+
+        <section id="graph">
+          <h2>Choose a graph</h2>
+          <p>
+            The notebook builds the adjacency matrix of whichever graph you
+            pick. The edge probability applies only to the random
+            (Erdős–Rényi) graph; the Petersen graph fixes its own size of ten
+            nodes.
+          </p>
+          <div class="controls">
+            <p class="controls-label">Graph construction</p>
+            <marimo-output value="graph_type"></marimo-output>
+            <marimo-output value="n_nodes"></marimo-output>
+            <marimo-output value="edge_prob"></marimo-output>
+          </div>
+          <div class="chips" aria-label="Live graph statistics">
+            <span class="chip"><b mo-value="drawing_stats.n_nodes"></b>&nbsp;nodes</span>
+            <span class="chip"><b mo-value="drawing_stats.n_edges"></b>&nbsp;edges</span>
+            <span class="chip">λ<sub>2</sub> = <b mo-value="drawing_stats.lambda2"></b></span>
+          </div>
+          <p class="note">
+            λ<sub>2</sub> is the algebraic connectivity. Watch it drop toward
+            zero when the random graph's edge probability is low enough to
+            nearly disconnect it.
+          </p>
+        </section>
+
+        <section id="layouts">
+          <h2>Two drawings, one graph</h2>
+          <p>
+            Both panels below draw exactly the same nodes and edges. The left
+            panel throws the nodes down at random. The right panel places node
+            <span class="mono">i</span> at the point whose coordinates are the
+            <span class="mono">i</span>-th entries of two Laplacian
+            eigenvectors. No force simulation, no iteration — one call to
+            <span class="mono">eigh</span> and the structure appears.
+          </p>
+          <div class="panel-row">
+            <figure class="figure-panel">
+              <marimo-cell name="random_layout"></marimo-cell>
+              <figcaption>Random positions: the structure is invisible.</figcaption>
+            </figure>
+            <figure class="figure-panel">
+              <marimo-cell name="spectral_layout"></marimo-cell>
+              <figcaption>
+                Spectral positions: paths straighten, cycles become circles,
+                grids become grids.
+              </figcaption>
+            </figure>
+          </div>
+          <p>
+            Try each graph in the picker above. The cycle unrolls into a true
+            circle, and the grid reproduces itself — the eigenvectors of a grid
+            are products of cosines, so the drawing is a slightly curved lattice.
+          </p>
+        </section>
+
+        <section id="axes">
+          <h2>Choose the axes</h2>
+          <p>
+            The classical drawing uses eigenvectors 1 and 2 (counting from the
+            constant eigenvector 0, which is useless as a coordinate — it puts
+            every node at the same place). Nothing stops you from using higher
+            ones:
+          </p>
+          <div class="controls">
+            <p class="controls-label">Coordinates and coloring</p>
+            <marimo-output value="evec_x"></marimo-output>
+            <marimo-output value="evec_y"></marimo-output>
+            <marimo-output value="color_by"></marimo-output>
+          </div>
+          <div class="chips" aria-label="Selected eigenvalues">
+            <span class="chip">λ<sub>x</sub> = <b mo-value="drawing_stats.lambda_x"></b></span>
+            <span class="chip">λ<sub>y</sub> = <b mo-value="drawing_stats.lambda_y"></b></span>
+          </div>
+          <p>
+            Higher eigenvectors oscillate: they change sign between neighbors
+            instead of varying smoothly. Push both sliders up on the path graph
+            and the tidy curve folds into a zigzag — the node coloring shows the
+            oscillation directly.
+          </p>
+        </section>
+
+        <section id="spectrum">
+          <h2>Read the spectrum</h2>
+          <p>
+            The full set of eigenvalues is a fingerprint of the graph. Small
+            eigenvalues correspond to smooth, global structure; large ones to
+            rapid local oscillation. Your current axes are highlighted.
+          </p>
+          <figure class="figure-panel">
+            <marimo-cell name="spectrum_plot"></marimo-cell>
+            <figcaption>
+              The Laplacian spectrum, with the two eigenvectors used as
+              coordinates in blue.
+            </figcaption>
+          </figure>
+          <p>
+            Chapter 3 turns this observation into an algorithm: if smooth
+            structure lives at the low end of the spectrum, then noise — which
+            is anything but smooth — can be removed by discarding the high end.
+          </p>
+        </section>
+
+        <nav class="pager" aria-label="Chapter navigation">
+          <a class="prev" href="../shape/">
+            <span class="pager-dir">Previous chapter</span>
+            1 · The Shape of a Matrix
+          </a>
+          <a class="next" href="../filtering/">
+            <span class="pager-dir">Next chapter</span>
+            3 · Filtering on Graphs
+          </a>
+        </nav>
+      </main>
+    </div>
+
+    <p class="boot-pill" aria-live="polite">starting Python — figures load in a moment</p>
+  </body>
+</html>

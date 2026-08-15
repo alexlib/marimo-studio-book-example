@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Filtering on Graphs · The Spectral Lens</title>
+    <style>
+      /* Critical: paint the right canvas color before any stylesheet loads,
+         so navigating between pages never flashes the browser's default
+         white background (glaring in dark mode). Keep in sync with the
+         --paper token in book.css. */
+      :root {
+        color-scheme: light dark;
+      }
+      html {
+        background: #faf8f3;
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          background: #15171c;
+        }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap"
+    />
+    <link rel="stylesheet" href="book.css" />
+    <script type="module" src="book.js"></script>
+  </head>
+  <body>
+    <div class="book" id="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="../">
+          <span class="brand-title">The Spectral Lens</span>
+          <span class="brand-sub">Eigenvalues, graphs, and the structure they reveal</span>
+        </a>
+        <nav aria-label="Chapters">
+          <ol class="toc">
+            <li>
+              <a href="../shape/"><span class="chapter-no">1</span>The Shape of a Matrix</a>
+            </li>
+            <li>
+              <a href="../drawing/"><span class="chapter-no">2</span>Drawing with Eigenvectors</a>
+            </li>
+            <li class="current">
+              <a href="./" aria-current="page"><span class="chapter-no">3</span>Filtering on Graphs</a>
+              <ol class="sections">
+                <li><a href="#signal">A signal on a circle</a></li>
+                <li><a href="#filter">Filter in the eigenbasis</a></li>
+                <li><a href="#recovery">The recovery, node by node</a></li>
+              </ol>
+            </li>
+          </ol>
+        </nav>
+        <p class="sidebar-foot">
+          Every figure on this page is a live cell of a
+          <a href="https://marimo.io">marimo</a> notebook, presented with
+          <a href="https://pypi.org/project/marimo-studio/">marimo studio</a>.
+          Python runs in your browser.
+        </p>
+      </aside>
+
+      <main class="content">
+        <header class="chapter-header">
+          <p class="eyebrow">Chapter 3</p>
+          <h1>Filtering on Graphs</h1>
+          <p class="dek">
+            The Laplacian's eigenvectors are a Fourier basis for a graph.
+            Signals live at the smooth end; noise spreads everywhere. Keep the
+            smooth end, and the noise falls away.
+          </p>
+        </header>
+
+        <p>
+          A <strong>graph signal</strong> assigns a number to every node of a
+          graph — a temperature to every sensor, a measurement to every point.
+          Chapter 2 showed that low Laplacian eigenvectors vary smoothly across
+          edges while high ones oscillate. This chapter uses that split as a
+          filter: expand a noisy measurement in the eigenbasis, discard the
+          rough components, and reconstruct.
+        </p>
+
+        <section id="signal">
+          <h2>A signal on a circle</h2>
+          <p>
+            The notebook samples points on a circle, joins each to its nearest
+            neighbors, and measures a signal at every node — then corrupts it
+            with Gaussian noise. You control all four ingredients.
+          </p>
+          <div class="controls">
+            <p class="controls-label">The measurement</p>
+            <marimo-output value="signal_type"></marimo-output>
+            <marimo-output value="n_nodes"></marimo-output>
+            <marimo-output value="n_neighbors"></marimo-output>
+            <marimo-output value="noise_level"></marimo-output>
+          </div>
+          <div class="panel-row triple">
+            <figure class="figure-panel">
+              <marimo-cell name="truth_panel"></marimo-cell>
+              <figcaption>What we want to recover.</figcaption>
+            </figure>
+            <figure class="figure-panel">
+              <marimo-cell name="noisy_panel"></marimo-cell>
+              <figcaption>What we actually measured.</figcaption>
+            </figure>
+            <figure class="figure-panel">
+              <marimo-cell name="denoised_panel"></marimo-cell>
+              <figcaption>What the filter recovers.</figcaption>
+            </figure>
+          </div>
+          <p class="note">
+            All three panels share one color scale, so a node's color means the
+            same signal value in each.
+          </p>
+        </section>
+
+        <section id="filter">
+          <h2>Filter in the eigenbasis</h2>
+          <p>
+            The eigenvectors <span class="mono">v<sub>1</sub>, …,
+            v<sub>n</sub></span> of the Laplacian form an orthonormal basis, so
+            any signal <span class="mono">f</span> is a unique combination of
+            them. Denoising is a projection: keep only the first
+            <span class="mono">k</span> terms.
+          </p>
+          <div class="equation">
+            <marimo-cell name="math_projection"></marimo-cell>
+          </div>
+          <div class="controls">
+            <p class="controls-label">The one knob that matters</p>
+            <marimo-output value="n_components"></marimo-output>
+          </div>
+          <figure class="figure-panel">
+            <marimo-cell name="coefficient_bars"></marimo-cell>
+            <figcaption>
+              The noisy signal's coefficients in the eigenbasis. Blue bars are
+              kept; everything right of the dashed cutoff is discarded.
+            </figcaption>
+          </figure>
+          <p>
+            The bar chart shows why this works: the true signal concentrates
+            its energy in the first few coefficients, while noise spreads
+            thinly across all of them. With the current settings, filtering
+            improves the mean squared error by a factor of
+            <b mo-value="denoise_stats.improvement"></b>.
+          </p>
+          <div class="chips" aria-label="Live error statistics">
+            <span class="chip">components kept: <b mo-value="denoise_stats.kept"></b></span>
+            <span class="chip">MSE noisy: <b mo-value="denoise_stats.mse_noisy"></b></span>
+            <span class="chip">MSE denoised: <b mo-value="denoise_stats.mse_denoised"></b></span>
+            <span class="chip">edges: <b mo-value="denoise_stats.n_edges"></b></span>
+          </div>
+          <p>
+            Slide the cutoff and watch the trade-off: too few components and
+            the reconstruction is oversmoothed (the step function loses its
+            corners); too many and the noise creeps back in. The step function
+            is the hardest of the three signals for exactly the reason sharp
+            edges are hard in classical Fourier analysis.
+          </p>
+        </section>
+
+        <section id="recovery">
+          <h2>The recovery, node by node</h2>
+          <p>
+            Unrolling the circle into a line makes the comparison exact: the
+            measured points scatter around the truth, and the filtered curve
+            threads between them.
+          </p>
+          <figure class="figure-panel">
+            <marimo-cell name="signal_trace"></marimo-cell>
+            <figcaption>
+              Ground truth (black), noisy measurements (gray), and the
+              spectral reconstruction (blue).
+            </figcaption>
+          </figure>
+          <details class="proof">
+            <summary>Why projection is the best possible answer in the subspace</summary>
+            <marimo-cell name="projection_proof"></marimo-cell>
+          </details>
+          <p>
+            That closes the loop of this little book. A matrix is a shape
+            (Chapter 1); a graph's Laplacian turns connectivity into a matrix
+            whose eigenvectors draw the graph (Chapter 2); and those same
+            eigenvectors form the frequency basis in which signals on the graph
+            can be cleaned (Chapter 3). One decomposition, three lenses.
+          </p>
+        </section>
+
+        <nav class="pager" aria-label="Chapter navigation">
+          <a class="prev" href="../drawing/">
+            <span class="pager-dir">Previous chapter</span>
+            2 · Drawing with Eigenvectors
+          </a>
+          <a class="next" href="../">
+            <span class="pager-dir">Back to</span>
+            Cover
+          </a>
+        </nav>
+      </main>
+    </div>
+
+    <p class="boot-pill" aria-live="polite">starting Python — figures load in a moment</p>
+  </body>
+</html>
