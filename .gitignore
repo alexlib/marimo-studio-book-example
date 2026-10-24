@@ -8,3 +8,4 @@ __marimo__/studio/*/chapter/book.js
 
 # Python
 __pycache__/
+uv.lock
